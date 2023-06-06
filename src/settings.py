@@ -14,6 +14,8 @@ class AppSettings(BaseSettings):
 
     TEST_FRACTION: float = 0.1
 
+    RETRAIN: bool = False
+
     abs_path = Path(__file__).resolve().parent.parent / "data"
 
     OUTPUT_FILE = abs_path / "output" / "entity_matching_output.csv"

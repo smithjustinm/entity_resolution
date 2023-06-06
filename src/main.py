@@ -2,7 +2,9 @@ import csv
 
 import dedupe
 
-from settings import settings
+from src.preprocess import dataframe_processing
+from src.settings import settings
+from src.train import train, read_and_process
 
 logger = settings.setup_logging()
 
@@ -33,10 +35,14 @@ def get_results():
 
     fields = settings.FIELDS
 
-    linker = dedupe.RecordLink(fields, in_memory=True)
+    linker = dedupe.RecordLink(fields)
+
+    # read csv to dict format
+    left_data = read_and_process(settings.LEFT_DATA_PROCESSED)
+    right_data = read_and_process(settings.RIGHT_DATA_PROCESSED)
 
     linked_records = linker.join(
-        settings.LEFT_DATA_PROCESSED, settings.RIGHT_DATA_PROCESSED, threshold=0.0
+        left_data, right_data, threshold=0.0
     )
 
     logger.info("# duplicate sets %s" % len(linked_records))
@@ -56,11 +62,11 @@ def get_results():
             reader = csv.DictReader(file_input)
 
             if header_unwritten:
-                fieldnames = [
+                fieldnames = ([
                     "cluster id",
                     "confidence",
                     "source file",
-                ] + reader.fieldnames
+                ] + reader.fieldnames)
 
                 writer = csv.DictWriter(_output_file, fieldnames)
                 writer.writeheader()
@@ -78,9 +84,13 @@ def get_results():
 
 
 if __name__ == "__main__":
-    # dataframe_processing()
-    # logger.info("Dataframe processing complete")
-    # train()
-    # logger.info("Training complete")
+    # if df_a and df_b exist in data/output then skip the dataframe processing
+    # otherwise process the dataframes
+    if not settings.DF_A.exists() and not settings.DF_B.exists():
+        dataframe_processing()
+        logger.info("Dataframe processing complete")
+
+    train()
+    logger.info("Training complete")
     get_results()
     logger.info("Results complete!")

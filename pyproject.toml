@@ -43,9 +43,9 @@ directory = "test-reports/htmlcov"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--asyncio-mode=auto"
+addopts = "-ra -q"
 testpaths = [
-    "tests/test_unit",
+    "tests",
 ]
 
 [tool.ruff]
