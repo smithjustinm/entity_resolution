@@ -2,9 +2,8 @@ import csv
 
 import dedupe
 
-from preprocess import dataframe_processing
 from settings import settings
-from train import train, read_and_process
+from train import read_and_process
 
 logger = settings.setup_logging()
 
@@ -44,9 +43,7 @@ def get_results(use_static: bool = False):
     left_data = read_and_process(settings.LEFT_DATA_PROCESSED)
     right_data = read_and_process(settings.RIGHT_DATA_PROCESSED)
 
-    linked_records = linker.join(
-        left_data, right_data, threshold=settings.THRESHOLD
-    )
+    linked_records = linker.join(left_data, right_data, threshold=settings.THRESHOLD)
 
     _cluster_membership = cluster_membership(linked_records)
 
@@ -75,20 +72,30 @@ def get_results(use_static: bool = False):
 
                     header_unwritten = False
 
-                logger.info("iterating through rows")
-                for row_id, row in enumerate(reader):
-                    record_id = filename + str(row_id)
-                    row["source_file"] = fileno
-                    # _cluster_membership is a dictionary of cluster_id and confidence score
-                    row["cluster_id"] = [(key, value["cluster_id"]) for key, value in _cluster_membership.items()]
-                    row["confidence_score"] = [(key, value["confidence_score"]) for key, value in _cluster_membership.items()]
+                try:
+                    logger.info("iterating through rows")
+                    for row_id, row in enumerate(reader):
+                        record_id = filename + str(row_id)
+                        row["source_file"] = fileno
+                        cluster_details = _cluster_membership.get(record_id, {})
+                        row.update(cluster_details)
+                        row["cluster_id"] = [
+                            (key, value["cluster_id"])
+                            for key, value in _cluster_membership.items()
+                        ]
+                        row["confidence_score"] = [
+                            (key, value["confidence_score"])
+                            for key, value in _cluster_membership.items()
+                        ]
 
-                    # for key, value in _cluster_membership.items():
-                    #     row["cluster_id"] = value["cluster_id"]
-                    #     row["confidence_score"] = value["confidence_score"]
+                        # for key, value in _cluster_membership.items():
+                        #     row["cluster_id"] = value["cluster_id"]
+                        #     row["confidence_score"] = value["confidence_score"]
 
-                    writer.writerow(row)
+                        writer.writerow(row)
 
+                except Exception as e:
+                    logger.exception("Error iterating through file", e)
 
 
 if __name__ == "__main__":
