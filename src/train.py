@@ -58,7 +58,8 @@ def read_data(_filename):
             data_dict[i] = _row
     return data_dict
 
-def train():
+
+def train(is_labeled: bool = False):
     """Train the model"""
 
     logger.info("Creating a labeled data set")
@@ -92,11 +93,12 @@ def train():
         logger.info("creating labeled examples from %s" % training_file)
         linker.prepare_training(left_data, right_data)
 
-    logger.info("Starting active labeling...")
+    if is_labeled:
+        logger.info("Starting active labeling...")
 
-    dedupe.console_label(linker)
+        dedupe.console_label(linker)
 
-    logger.info("finished console labeling")
+        logger.info("finished console labeling")
 
     linker.train(index_predicates=False, recall=0.80)
 
