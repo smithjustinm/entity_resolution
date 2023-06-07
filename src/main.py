@@ -2,9 +2,9 @@ import csv
 
 import dedupe
 
-from src.preprocess import dataframe_processing
-from src.settings import settings
-from src.train import train, read_and_process
+from preprocess import dataframe_processing
+from settings import settings
+from train import train, read_and_process
 
 logger = settings.setup_logging()
 
@@ -87,20 +87,15 @@ def get_results(use_static: bool = False):
 
                     writer.writerow(row)
 
-            file_input.close()
-
-        logger.info("Output file %s contains %s total pairs" % (output_file, row_id))
-
-    return output_file
 
 
 if __name__ == "__main__":
 
-    if not settings.DF_A.exists() and not settings.DF_B.exists():
-        dataframe_processing()
-        logger.info("Dataframe processing complete")
+    # if not settings.LEFT_DATA_PROCESSED.exists() and not settings.RIGHT_DATA_PROCESSED.exists():
+    dataframe_processing()
+    logger.info("Dataframe processing complete!")
 
-    train()
-    logger.info("Training complete")
+    train(is_labeled=False)
+    logger.info("Training complete!")
     get_results()
     logger.info("Results complete!")

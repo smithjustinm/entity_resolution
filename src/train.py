@@ -4,8 +4,8 @@ import os
 import dedupe
 import pandas as pd
 
-from src.preprocess import format_postal_code, string_manipulations
-from src.settings import settings
+from preprocess import format_postal_code, string_manipulations
+from settings import settings
 
 logger = settings.setup_logging()
 
@@ -59,7 +59,7 @@ def read_data(_filename):
     return data_dict
 
 
-def train(is_labeled: bool = False):
+def train(is_labeled: bool = True):
     """Train the model"""
 
     logger.info("Creating a labeled data set")
@@ -93,14 +93,14 @@ def train(is_labeled: bool = False):
         logger.info("creating labeled examples from %s" % training_file)
         linker.prepare_training(left_data, right_data)
 
-    if is_labeled:
+    if not is_labeled:
         logger.info("Starting active labeling...")
 
         dedupe.console_label(linker)
 
         logger.info("finished console labeling")
 
-    linker.train(index_predicates=False, recall=0.80)
+    linker.train(index_predicates=False, recall=0.85)
 
     logger.info("Training complete. Saving learned settings to %s" % settings_file)
 

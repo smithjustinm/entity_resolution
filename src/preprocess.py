@@ -3,7 +3,7 @@ import re
 import pandas as pd
 from unidecode import unidecode
 
-from src.settings import settings
+from settings import settings
 
 
 def dataframe_processing():
@@ -71,7 +71,7 @@ def string_manipulations(column):
     column = column.upper()  # make everything uppercase
     nulls_list = ["NAN", "NONE", "NULL", "N/A", "NA", "N A", "NOT_DEFINED", ""]
     if column in nulls_list:
-        column = "NaN"
+        column = None
 
     return column
 
@@ -81,6 +81,7 @@ def format_postal_code(country, postal):
     US zip should always be five digits so add a 0 to the front if it's only 4 digits
     CA zip should be in the format A1A 1A1
     Other countries should return the postal code as is
+    None values should return None
 
     Args:
         country (str): country code
@@ -91,22 +92,15 @@ def format_postal_code(country, postal):
     """
     us_zip_regex = re.compile(r"^\d{5}(?:[-\s]\d{4})?$")
     ca_zip_regex = re.compile(r"^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$")
-    if country == "US":
+    if country == "US" and postal is not None:
         if us_zip_regex.match(postal):
-            postal = postal.replace(" ", "")
             return postal
         elif len(postal) == 4:
-            postal = "0" + postal
-            return postal
-        elif len(postal) < 4:
-            return "NaN"
+            return "0" + postal
         else:
-            return postal
-    elif country == "CA":
+            return None
+    elif country == "CA" and postal is not None:
         if ca_zip_regex.match(postal):
-            postal = postal.replace(" ", "")
             return postal
         else:
-            return postal
-    else:
-        return postal
+            return None

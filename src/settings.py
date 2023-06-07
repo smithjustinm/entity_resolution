@@ -14,7 +14,7 @@ class AppSettings(BaseSettings):
 
     TEST_FRACTION: float = 0.1
 
-    THRESHOLD: float = 0.75
+    THRESHOLD: float = 0.0
 
     RETRAIN: bool = False
 
@@ -62,7 +62,7 @@ class AppSettings(BaseSettings):
 
         import structlog
 
-        from src.logging_setup import STD_LIB_PROCESSORS, STRUCTLOG_PROCESSORS
+        from logging_setup import STD_LIB_PROCESSORS, STRUCTLOG_PROCESSORS
 
         log_level = self.LOG_LEVEL.upper()
 
