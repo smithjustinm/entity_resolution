@@ -70,8 +70,6 @@ def get_results(use_static: bool = False):
                         "source_file",
                     ]
 
-                    logger.info("dictwriter step")
-
                     writer = csv.DictWriter(_output_file, fieldnames=fieldnames)
                     writer.writeheader()
 
@@ -79,11 +77,15 @@ def get_results(use_static: bool = False):
 
                 logger.info("iterating through rows")
                 for row_id, row in enumerate(reader):
-                    logger.info("writing row %s" % row_id)
                     record_id = filename + str(row_id)
-                    cluster_details = _cluster_membership.get(record_id, {})
                     row["source_file"] = fileno
-                    row.update(cluster_details)
+                    # _cluster_membership is a dictionary of cluster_id and confidence score
+                    row["cluster_id"] = [(key, value["cluster_id"]) for key, value in _cluster_membership.items()]
+                    row["confidence_score"] = [(key, value["confidence_score"]) for key, value in _cluster_membership.items()]
+
+                    # for key, value in _cluster_membership.items():
+                    #     row["cluster_id"] = value["cluster_id"]
+                    #     row["confidence_score"] = value["confidence_score"]
 
                     writer.writerow(row)
 
@@ -92,10 +94,10 @@ def get_results(use_static: bool = False):
 if __name__ == "__main__":
 
     # if not settings.LEFT_DATA_PROCESSED.exists() and not settings.RIGHT_DATA_PROCESSED.exists():
-    dataframe_processing()
-    logger.info("Dataframe processing complete!")
+    # dataframe_processing()
+    # logger.info("Dataframe processing complete!")
 
-    train(is_labeled=False)
-    logger.info("Training complete!")
-    get_results()
+    # train()
+    # logger.info("Training complete!")
+    get_results(use_static=True)
     logger.info("Results complete!")
